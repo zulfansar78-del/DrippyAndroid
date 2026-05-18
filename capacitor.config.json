@@ -1,0 +1,13 @@
+{
+  "appId": "com.zulfaqar.drippy",
+  "appName": "Drippy",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#0EA5E9"
+    }
+  }
+}
