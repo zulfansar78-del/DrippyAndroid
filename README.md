@@ -2,6 +2,16 @@
 
 This folder turns the Drippy reminder web app into a real Android APK using Capacitor. The Android build adds **native local notifications** that fire reliably even when the app is closed, the phone is locked, and the screen is off (using Android's `AlarmManager` under the hood).
 
+## What's new in this version
+
+- **🔒 Lock-screen reminders fixed** — High-importance notification channel with vibration, sound, and lock-screen visibility. Manifest patched with `SCHEDULE_EXACT_ALARM` and friends.
+- **🔘 Done / Snooze buttons** right inside every notification — no need to open the app.
+- **⏸️ Pause mode** — mute reminders for 1h, 4h, until 6 AM tomorrow, or a custom duration. Useful during meetings, prayers, or naps.
+- **🏆 Achievements** — 8 unlockable badges (First Drop, Hydration Hero, Wellness Royalty, Perfect Day, etc.) with popup celebrations when you unlock one.
+- **📅 7-day history** — see your last week of progress at a glance, color-coded by category.
+- **🎨 4 themes** — Sky, Ocean, Sunset, Forest (plus dark mode by cycling the theme pill).
+- **📄 Play Store materials** — see `PRIVACY_POLICY.md` and `PLAY_STORE_SETUP.md` to publish Drippy publicly.
+
 You have two ways to build the APK. Pick one.
 
 ---
