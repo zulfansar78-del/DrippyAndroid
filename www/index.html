@@ -6,7 +6,7 @@
 <title>Drippy — Your Daily Wellness Buddy</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>" />
 <style>
-  :root {
+  : root {
     --bg1: #fef3c7;
     --bg2: #dbeafe;
     --bg3: #fce7f3;
@@ -501,10 +501,141 @@
     text-align: center; margin-top: 30px;
     color: var(--text-soft); font-size: 12px;
   }
+
+  /* === NEW: PAUSE BANNER === */
+  .pause-banner {
+    display: none; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white;
+    padding: 10px 18px; border-radius: 14px; margin-bottom: 14px;
+    box-shadow: var(--shadow); font-weight: 600; font-size: 14px;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .pause-banner.active { display: flex; }
+  .pause-banner button {
+    background: rgba(0,0,0,0.22); color: white; border: none;
+    padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+
+  /* === NEW: ACHIEVEMENTS === */
+  .badges-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 10px;
+  }
+  .badge {
+    text-align: center; padding: 12px 6px;
+    background: var(--card-strong);
+    border: 1px solid var(--border);
+    border-radius: 14px; font-size: 10px; color: var(--text-soft);
+    cursor: pointer; transition: transform 0.15s;
+    font-weight: 600;
+  }
+  .badge:hover { transform: scale(1.05); }
+  .badge .be { font-size: 28px; display: block; margin-bottom: 4px; }
+  .badge.unlocked { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border-color: transparent; }
+  .badge.locked { opacity: 0.35; filter: grayscale(0.8); }
+
+  /* === NEW: HISTORY GRID === */
+  .history-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .history-day {
+    text-align: center; padding: 10px 4px;
+    background: var(--card-strong); border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .history-day.today { border-color: var(--water); border-width: 2px; }
+  .history-day .hd-label { font-size: 10px; color: var(--text-soft); font-weight: 700; text-transform: uppercase; }
+  .history-day .hd-dots { display: flex; gap: 3px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+  .history-day .hd-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .history-day .hd-dot.water { background: var(--water); }
+  .history-day .hd-dot.food { background: var(--food); }
+  .history-day .hd-dot.med { background: var(--med); }
+  .history-day .hd-dot.diet { background: var(--diet); }
+
+  /* === NEW: EXTRA THEMES === */
+  [data-theme="ocean"] {
+    --bg1: #0891b2; --bg2: #1e3a8a; --bg3: #0e7490;
+    --text: #f0f9ff; --text-soft: #cbd5e1;
+    --card: rgba(15, 23, 42, 0.55);
+    --card-strong: rgba(15, 23, 42, 0.85);
+    --border: rgba(148,163,184,0.25);
+  }
+  [data-theme="sunset"] {
+    --bg1: #fb923c; --bg2: #f87171; --bg3: #c084fc;
+    --text: #fffbeb; --text-soft: #fef3c7;
+    --card: rgba(127, 29, 29, 0.4);
+    --card-strong: rgba(127, 29, 29, 0.7);
+    --border: rgba(254,243,199,0.25);
+  }
+  [data-theme="forest"] {
+    --bg1: #84cc16; --bg2: #14b8a6; --bg3: #65a30d;
+    --text: #f0fdf4; --text-soft: #bbf7d0;
+    --card: rgba(20, 83, 45, 0.5);
+    --card-strong: rgba(20, 83, 45, 0.8);
+    --border: rgba(187,247,208,0.25);
+  }
+
+  /* === NEW: THEME PICKER IN SETTINGS === */
+  .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px; }
+  .theme-swatch {
+    aspect-ratio: 1; border-radius: 12px; cursor: pointer;
+    border: 3px solid transparent; transition: transform 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .theme-swatch:hover { transform: scale(1.05); }
+  .theme-swatch.active { border-color: var(--water); }
+  .theme-swatch::after {
+    content: attr(data-name); position: absolute; bottom: 4px; left: 0; right: 0;
+    text-align: center; font-size: 9px; font-weight: 700; color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .theme-swatch.sky { background: linear-gradient(135deg, #fef3c7, #dbeafe, #fce7f3); }
+  .theme-swatch.ocean { background: linear-gradient(135deg, #0891b2, #1e3a8a, #0e7490); }
+  .theme-swatch.sunset { background: linear-gradient(135deg, #fb923c, #f87171, #c084fc); }
+  .theme-swatch.forest { background: linear-gradient(135deg, #84cc16, #14b8a6, #65a30d); }
+
+  /* === NEW: PAUSE DROPDOWN === */
+  .pause-menu {
+    position: absolute; right: 0; top: calc(100% + 6px);
+    background: var(--card-strong); border: 1px solid var(--border);
+    border-radius: 12px; padding: 6px;
+    box-shadow: var(--shadow); z-index: 50;
+    display: none; min-width: 180px;
+  }
+  .pause-menu.show { display: block; }
+  .pause-menu button {
+    width: 100%; background: transparent; border: none; padding: 8px 12px;
+    text-align: left; cursor: pointer; border-radius: 8px;
+    color: var(--text); font-size: 13px; font-weight: 600;
+  }
+  .pause-menu button:hover { background: var(--border); }
+  .pause-wrap { position: relative; }
+
+  /* === NEW: ACHIEVEMENT POPUP === */
+  .achievement-popup {
+    position: fixed; left: 50%; top: 30px;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white; padding: 14px 20px; border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    z-index: 999; font-weight: 700; opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 90vw;
+  }
+  .achievement-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .achievement-popup .ap-ico { font-size: 36px; }
+  .achievement-popup .ap-label { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; }
+  .achievement-popup .ap-name { font-size: 16px; }
+
 </style>
 </head>
 <body>
 <div class="container">
+
+  <div class="pause-banner" id="pauseBanner">
+    <div>⏸️ Reminders paused. Resumes <span id="pauseUntilText">soon</span>.</div>
+    <button id="resumeBtn">Resume now</button>
+  </div>
 
   <header>
     <div class="brand">
@@ -518,6 +649,15 @@
       <button class="pill" id="streakPill">🔥 <span id="streakCount">0</span>-day streak</button>
       <button class="pill" id="notifBtn">🔔 <span id="notifText">Enable alerts</span></button>
       <button class="pill" id="themeBtn">🌙 Theme</button>
+      <div class="pause-wrap">
+        <button class="pill" id="pauseBtn">⏸️ Pause</button>
+        <div class="pause-menu" id="pauseMenu">
+          <button data-pause="60">⏱ Pause for 1 hour</button>
+          <button data-pause="240">⏱ Pause for 4 hours</button>
+          <button data-pause="morning">🌅 Pause until 6 AM tomorrow</button>
+          <button data-pause="custom">⚙️ Custom...</button>
+        </div>
+      </div>
       <button class="pill" id="settingsBtn">⚙️ Settings</button>
     </div>
   </header>
@@ -645,6 +785,16 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top: 18px;">
+    <h2>📅 Last 7 days</h2>
+    <div class="history-grid" id="historyGrid"></div>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h2>🏆 Achievements</h2>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </div>
+
   <footer>
     Built with 💙 — All your data stays on your device. Keep the tab open for reminders to fire.
   </footer>
@@ -697,6 +847,15 @@
 <div class="modal-bg" id="settingsModal">
   <div class="modal">
     <h3>⚙️ Settings</h3>
+    <div class="form-row">
+      <label>Theme</label>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-swatch sky" data-theme="light" data-name="Sky"></div>
+        <div class="theme-swatch ocean" data-theme="ocean" data-name="Ocean"></div>
+        <div class="theme-swatch sunset" data-theme="sunset" data-name="Sunset"></div>
+        <div class="theme-swatch forest" data-theme="forest" data-name="Forest"></div>
+      </div>
+    </div>
     <div class="settings-row">
       <label for="setWaterGoal">Daily water goal (cups)</label>
       <input type="number" id="setWaterGoal" min="1" max="20" value="8" />
@@ -744,6 +903,8 @@ const defaultData = () => ({
   fired: {}, // { 'YYYY-MM-DD_id_HH:MM': true }
   streak: 0,
   lastStreakDay: null,
+  pauseUntil: null,           // timestamp ms; null = not paused
+  achievements: {},           // { badgeId: 'YYYY-MM-DD' (date unlocked) }
   settings: {
     waterGoal: 14,
     snooze: 5,
@@ -1060,6 +1221,9 @@ function formatMin(min) {
 
 /* ---------- FIRING REMINDERS ---------- */
 function checkReminders() {
+  if (isPaused()) return;
+  // Auto-clear expired pause
+  if (data.pauseUntil && Date.now() >= data.pauseUntil) clearPause();
   const now = new Date();
   const hh = String(now.getHours()).padStart(2,'0');
   const mm = String(now.getMinutes()).padStart(2,'0');
@@ -1191,8 +1355,12 @@ document.getElementById('notifBtn').addEventListener('click', async () => {
 
 /* ---------- THEME ---------- */
 document.getElementById('themeBtn').addEventListener('click', () => {
-  data.settings.theme = data.settings.theme === 'dark' ? 'light' : 'dark';
+  // Cycle through themes: light -> ocean -> sunset -> forest -> dark -> light
+  const order = ['light', 'ocean', 'sunset', 'forest', 'dark'];
+  const idx = order.indexOf(data.settings.theme);
+  data.settings.theme = order[(idx + 1) % order.length];
   document.documentElement.setAttribute('data-theme', data.settings.theme);
+  document.querySelectorAll('#themeGrid .theme-swatch').forEach(x => x.classList.toggle('active', x.dataset.theme === data.settings.theme));
   save();
 });
 
@@ -1249,6 +1417,207 @@ function bigCelebration() {
   greet.textContent = '🎉 STREAK +1! 🎉';
 }
 
+/* ========== PAUSE MODE ========== */
+function isPaused() {
+  return !!(data.pauseUntil && Date.now() < data.pauseUntil);
+}
+function setPause(minsOrMode) {
+  let until;
+  if (minsOrMode === 'morning') {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    d.setHours(6, 0, 0, 0);
+    until = d.getTime();
+  } else if (typeof minsOrMode === 'number') {
+    until = Date.now() + minsOrMode * 60000;
+  } else {
+    return;
+  }
+  data.pauseUntil = until;
+  save();
+  updatePauseBanner();
+}
+function clearPause() {
+  data.pauseUntil = null;
+  save();
+  updatePauseBanner();
+}
+function updatePauseBanner() {
+  const banner = document.getElementById('pauseBanner');
+  if (!banner) return;
+  if (isPaused()) {
+    banner.classList.add('active');
+    const d = new Date(data.pauseUntil);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const isToday = (d.getTime() - today.getTime()) < 86400000;
+    const label = isToday ? `at ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+                          : `tomorrow at ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('pauseUntilText').textContent = label;
+  } else {
+    banner.classList.remove('active');
+  }
+}
+
+/* ========== ACHIEVEMENTS ========== */
+const ACHIEVEMENTS = [
+  { id: 'first_drop', icon: '💧', name: 'First Drop', desc: 'Log your first cup of water', check: d => totalLogs(d, 'water') >= 1 },
+  { id: 'three_streak', icon: '🔥', name: 'Heating Up', desc: 'Hit all 4 goals 3 days in a row', check: d => (d.streak || 0) >= 3 },
+  { id: 'seven_streak', icon: '⚡', name: 'Hydration Hero', desc: '7-day perfect streak', check: d => (d.streak || 0) >= 7 },
+  { id: 'thirty_streak', icon: '👑', name: 'Wellness Royalty', desc: '30-day perfect streak', check: d => (d.streak || 0) >= 30 },
+  { id: 'water_50', icon: '🌊', name: 'Ocean Sipper', desc: 'Log 50 cups of water (any time)', check: d => totalLogs(d, 'water') >= 50 },
+  { id: 'med_consistent', icon: '💊', name: 'Reliable', desc: 'Take vitamins 7 days straight', check: d => consecutiveDays(d, 'med', 2) >= 7 },
+  { id: 'perfect_day', icon: '🌟', name: 'Perfect Day', desc: 'Hit all 4 goals in one day', check: d => hasPerfectDay(d) },
+  { id: 'early_bird', icon: '🐦', name: 'Early Bird', desc: 'Log water before 7 AM', check: d => d._earlyLog === true },
+];
+
+function totalLogs(d, type) {
+  let t = 0;
+  for (const day of Object.values(d.log || {})) t += day[type] || 0;
+  return t;
+}
+function hasPerfectDay(d) {
+  const goals = { water: d.settings.waterGoal, food: 3, med: 2, diet: 2 };
+  for (const day of Object.values(d.log || {})) {
+    if ((day.water||0) >= goals.water && (day.food||0) >= goals.food &&
+        (day.med||0) >= goals.med && (day.diet||0) >= goals.diet) return true;
+  }
+  return false;
+}
+function consecutiveDays(d, type, minPerDay) {
+  const dates = Object.keys(d.log || {}).sort();
+  let best = 0, cur = 0, prev = null;
+  for (const dt of dates) {
+    const ok = (d.log[dt][type] || 0) >= minPerDay;
+    if (!ok) { cur = 0; prev = dt; continue; }
+    if (prev) {
+      const diff = (new Date(dt) - new Date(prev)) / 86400000;
+      cur = (diff === 1) ? cur + 1 : 1;
+    } else cur = 1;
+    if (cur > best) best = cur;
+    prev = dt;
+  }
+  return best;
+}
+function checkAchievements() {
+  let newly = [];
+  // Mark early-bird flag if logging water before 7am
+  const h = new Date().getHours();
+  if (h < 7) data._earlyLog = true;
+  for (const a of ACHIEVEMENTS) {
+    if (data.achievements[a.id]) continue;
+    try {
+      if (a.check(data)) {
+        data.achievements[a.id] = today();
+        newly.push(a);
+      }
+    } catch (e) {}
+  }
+  if (newly.length) {
+    save();
+    renderBadges();
+    newly.forEach((a, i) => setTimeout(() => showAchievementPopup(a), i * 2200));
+  }
+}
+function showAchievementPopup(a) {
+  const el = document.createElement('div');
+  el.className = 'achievement-popup';
+  el.innerHTML = `<div class="ap-ico">${a.icon}</div><div><div class="ap-label">Achievement unlocked</div><div class="ap-name">${a.name}</div></div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add('show'), 50);
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 400);
+  }, 3500);
+}
+function renderBadges() {
+  const grid = document.getElementById('badgesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (const a of ACHIEVEMENTS) {
+    const unlocked = !!data.achievements[a.id];
+    const el = document.createElement('div');
+    el.className = 'badge ' + (unlocked ? 'unlocked' : 'locked');
+    el.innerHTML = `<span class="be">${a.icon}</span>${a.name}`;
+    el.title = a.desc + (unlocked ? ` (unlocked ${data.achievements[a.id]})` : '');
+    el.addEventListener('click', () => alert(`${a.icon} ${a.name}\n\n${a.desc}${unlocked ? '\n\n✓ Unlocked on ' + data.achievements[a.id] : '\n\n🔒 Locked'}`));
+    grid.appendChild(el);
+  }
+}
+
+/* ========== WEEKLY HISTORY ========== */
+function renderHistory() {
+  const grid = document.getElementById('historyGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const goals = { water: data.settings.waterGoal, food: 3, med: 2, diet: 2 };
+  const today_str = today();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const log = data.log[key] || {};
+    const day = document.createElement('div');
+    day.className = 'history-day' + (key === today_str ? ' today' : '');
+    const dayName = d.toLocaleDateString(undefined, { weekday: 'short' });
+    const dayNum = d.getDate();
+    let dots = '';
+    for (const [type, goal] of Object.entries(goals)) {
+      const hit = (log[type] || 0) >= goal;
+      dots += `<div class="hd-dot ${hit ? type : ''}" title="${type}"></div>`;
+    }
+    day.innerHTML = `<div class="hd-label">${dayName}</div><div style="font-size:14px;font-weight:700;margin-top:2px;">${dayNum}</div><div class="hd-dots">${dots}</div>`;
+    grid.appendChild(day);
+  }
+}
+
+/* ========== PAUSE MENU UI ========== */
+document.addEventListener('DOMContentLoaded', () => {
+  const pauseBtn = document.getElementById('pauseBtn');
+  const pauseMenu = document.getElementById('pauseMenu');
+  if (pauseBtn && pauseMenu) {
+    pauseBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      pauseMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', () => pauseMenu.classList.remove('show'));
+    pauseMenu.querySelectorAll('[data-pause]').forEach(b => {
+      b.addEventListener('click', () => {
+        const v = b.dataset.pause;
+        if (v === 'custom') {
+          const mins = parseInt(prompt('Pause for how many minutes?', '30'));
+          if (mins > 0) setPause(mins);
+        } else if (v === 'morning') {
+          setPause('morning');
+        } else {
+          setPause(parseInt(v));
+        }
+        pauseMenu.classList.remove('show');
+      });
+    });
+  }
+  const resumeBtn = document.getElementById('resumeBtn');
+  if (resumeBtn) resumeBtn.addEventListener('click', clearPause);
+
+  // Theme picker
+  document.querySelectorAll('#themeGrid .theme-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const t = sw.dataset.theme;
+      data.settings.theme = t;
+      document.documentElement.setAttribute('data-theme', t);
+      document.querySelectorAll('#themeGrid .theme-swatch').forEach(x => x.classList.toggle('active', x === sw));
+      save();
+    });
+  });
+});
+
+/* ========== HOOK ACHIEVEMENT + HISTORY INTO LOG ========== */
+const _origIncrementLog = incrementLog;
+incrementLog = function(type) {
+  _origIncrementLog(type);
+  checkAchievements();
+  renderHistory();
+};
+
 /* ========== CAPACITOR (ANDROID) NATIVE INTEGRATION ==========
    When running inside the Android wrapper, hand reminders off to
    Android's AlarmManager via Capacitor LocalNotifications so reminders
@@ -1284,11 +1653,15 @@ async function nativeScheduleAll() {
         d.setDate(d.getDate() + dayOffset);
         d.setHours(h, m, 0, 0);
         if (d <= now) continue;
+        // Skip while paused
+        if (data.pauseUntil && d.getTime() < data.pauseUntil) continue;
         toSchedule.push({
           id: nativeStableId(`${r.id}_${d.toISOString().slice(0,10)}_${t}`),
           title: `${icons[r.type] || '⭐'} ${r.name}`,
           body: r.msg || 'Drippy reminder',
           schedule: { at: d, allowWhileIdle: true },
+          channelId: 'drippy-reminders',
+          actionTypeId: 'DRIPPY_ACTIONS',
           extra: { reminderId: r.id, type: r.type }
         });
       }
@@ -1310,8 +1683,39 @@ function onDataChanged() {
 async function nativeInit() {
   if (!IS_NATIVE) return;
   const { LocalNotifications } = Capacitor.Plugins;
+
+  // === HIGH-IMPORTANCE NOTIFICATION CHANNEL ===
+  // This is what makes notifications show on the lock screen, make sound,
+  // and pop up as heads-up notifications even when the phone is locked.
+  try {
+    await LocalNotifications.createChannel({
+      id: 'drippy-reminders',
+      name: 'Drippy Reminders',
+      description: 'Health reminders from Drippy',
+      importance: 5,         // MAX — heads up + lock screen
+      visibility: 1,         // PUBLIC — content visible on lock screen
+      vibration: true,
+      lights: true,
+      lightColor: '#0EA5E9'
+    });
+  } catch (e) { console.warn('[Drippy] createChannel failed', e); }
+
   try { await LocalNotifications.requestPermissions(); }
   catch (e) { console.warn('[Drippy] permission request failed', e); }
+
+  // === NOTIFICATION ACTION BUTTONS ===
+  // Adds "Done" and "Snooze" buttons inside every notification.
+  try {
+    await LocalNotifications.registerActionTypes({
+      types: [{
+        id: 'DRIPPY_ACTIONS',
+        actions: [
+          { id: 'done', title: 'Done' },
+          { id: 'snooze', title: 'Snooze 10m' }
+        ]
+      }]
+    });
+  } catch (e) { console.warn('[Drippy] registerActionTypes failed', e); }
 
   const btn = document.getElementById('notifBtn');
   const txt = document.getElementById('notifText');
@@ -1321,10 +1725,31 @@ async function nativeInit() {
     btn.classList.add('notif-on');
   }
 
-  LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+  LocalNotifications.addListener('localNotificationActionPerformed', async (action) => {
     const extra = action.notification.extra || {};
-    if (['water','food','med','diet'].includes(extra.type)) {
-      incrementLog(extra.type);
+    const actionId = action.actionId || 'tap';
+    if (actionId === 'snooze') {
+      // Snooze: schedule a new notification 10 minutes from now
+      const { LocalNotifications } = Capacitor.Plugins;
+      const when = new Date(Date.now() + 10 * 60 * 1000);
+      try {
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: nativeStableId(`snooze_${extra.reminderId}_${when.toISOString()}`),
+            title: action.notification.title,
+            body: action.notification.body,
+            schedule: { at: when, allowWhileIdle: true },
+            channelId: 'drippy-reminders',
+            actionTypeId: 'DRIPPY_ACTIONS',
+            extra
+          }]
+        });
+      } catch (e) { console.warn('[Drippy] snooze failed', e); }
+    } else {
+      // tap or 'done' — log the action
+      if (['water','food','med','diet'].includes(extra.type)) {
+        incrementLog(extra.type);
+      }
     }
   });
 
@@ -1338,10 +1763,21 @@ async function nativeInit() {
 /* ---------- INIT ---------- */
 function init() {
   document.documentElement.setAttribute('data-theme', data.settings.theme || 'light');
+  // Mark current theme swatch as active
+  setTimeout(() => {
+    document.querySelectorAll('#themeGrid .theme-swatch').forEach(x => {
+      x.classList.toggle('active', x.dataset.theme === (data.settings.theme || 'light'));
+    });
+  }, 100);
   updateClock();
   updateStats();
   updateMascot();
   renderReminders();
+  renderBadges();
+  renderHistory();
+  updatePauseBanner();
+  // Auto-clear expired pause
+  if (data.pauseUntil && Date.now() >= data.pauseUntil) clearPause();
   computeNextUp();
   refreshNotifBtn();
   setInterval(() => {
