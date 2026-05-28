@@ -1,7 +1,7 @@
 {
-  "name": "drippy-android",
+  "name": "vibelink-android",
   "version": "1.0.0",
-  "description": "Drippy — wellness reminder app wrapped for Android with native local notifications",
+  "description": "VibeLink — Plan it. Link it. Show up.",
   "private": true,
   "scripts": {
     "sync": "npx cap sync android",

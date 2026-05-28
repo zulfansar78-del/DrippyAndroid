@@ -1,6 +1,6 @@
 {
-  "appId": "com.zulfaqar.drippy",
-  "appName": "Drippy",
+  "appId": "com.zulfaqar.vibelink",
+  "appName": "VibeLink",
   "webDir": "www",
   "android": {
     "allowMixedContent": true
