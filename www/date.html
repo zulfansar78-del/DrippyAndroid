@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Will You Go On A Date With Me? 💌</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body {
+    background: linear-gradient(160deg, #fff0f6 0%, #fce4ec 40%, #f8bbd9 100%);
+    min-height: 100vh;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 20px; }
+
+  /* ── FLOATING HEARTS BACKGROUND ── */
+  .hearts-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .bg-heart {
+    position: absolute;
+    font-size: 20px;
+    animation: floatUp linear infinite;
+    opacity: 0.18;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0.18; }
+    100% { transform: translateY(-10vh) rotate(20deg); opacity: 0; }
+  }
+
+  /* ── ASK SCREEN ── */
+  #screen-ask {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .envelope-wrap {
+    font-size: 96px;
+    animation: bounce 1.8s ease-in-out infinite;
+    display: inline-block;
+    filter: drop-shadow(0 8px 16px rgba(233,30,99,0.3));
+    margin-bottom: 10px;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); }
+    50% { transform: translateY(-12px) rotate(4deg) scale(1.05); }
+  }
+  .ask-title {
+    font-size: clamp(28px, 8vw, 46px);
+    font-weight: 900;
+    color: #c2185b;
+    margin: 0 0 8px;
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(194,24,91,0.15);
+  }
+  .ask-sub {
+    font-size: 15px;
+    color: #e91e63;
+    margin-bottom: 36px;
+    opacity: 0.8;
+  }
+  .btn-yes {
+    background: linear-gradient(135deg, #e91e63, #ad1457);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 20px 52px;
+    font-size: 24px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(233,30,99,0.45);
+    transition: transform 0.12s, box-shadow 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    letter-spacing: 0.3px;
+  }
+  .btn-yes:active { transform: scale(0.96); }
+  .btn-yes:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(233,30,99,0.55); }
+
+  .btn-no {
+    position: fixed;
+    background: white;
+    color: #aaa;
+    border: 2px solid #f8bbd9;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.08s;
+    user-select: none;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+  /* ── YES CELEBRATION ── */
+  #screen-celebrate {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .celebrate-icon {
+    font-size: 88px;
+    animation: spin-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    display: inline-block;
+  }
+  @keyframes spin-in {
+    from { transform: scale(0) rotate(-180deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .celebrate-title {
+    font-size: clamp(26px, 7vw, 42px);
+    font-weight: 900;
+    color: #c2185b;
+    margin: 12px 0 6px;
+  }
+  .celebrate-sub {
+    color: #e91e63;
+    font-size: 16px;
+    margin-bottom: 28px;
+    opacity: 0.85;
+  }
+  .btn-plan {
+    background: linear-gradient(135deg, #e91e63, #ad1457);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 16px 44px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(233,30,99,0.4);
+    transition: transform 0.12s;
+    gap: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-plan:hover { transform: scale(1.04); }
+
+  /* ── PLAN SCREEN ── */
+  #screen-plan {
+    padding: 28px 20px 48px;
+    justify-content: flex-start;
+    align-items: stretch;
+    max-width: 540px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  .plan-back {
+    background: none; border: none; color: #e91e63;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    padding: 0; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 6px;
+    align-self: flex-start;
+  }
+  .plan-title {
+    font-size: 26px; font-weight: 900; color: #c2185b;
+    margin: 0 0 4px;
+    text-align: center;
+  }
+  .plan-sub {
+    text-align: center; color: #e91e63; font-size: 14px;
+    margin-bottom: 22px; opacity: 0.8;
+  }
+  .form-card {
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(233,30,99,0.15);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 30px rgba(233,30,99,0.12);
+    margin-bottom: 14px;
+  }
+  .form-label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: #ad1457; text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid rgba(233,30,99,0.2);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    font-size: 15px; font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #e91e63;
+    box-shadow: 0 0 0 3px rgba(233,30,99,0.12);
+  }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Vibe picker */
+  .vibe-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  @media (max-width: 360px) { .vibe-grid { grid-template-columns: repeat(2, 1fr); } }
+  .vibe-card {
+    background: rgba(255,255,255,0.7);
+    border: 2px solid rgba(233,30,99,0.15);
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .vibe-card:active { transform: scale(0.97); }
+  .vibe-card.selected {
+    border-color: #e91e63;
+    background: rgba(233,30,99,0.08);
+    box-shadow: 0 2px 12px rgba(233,30,99,0.2);
+  }
+  .vibe-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+  .vibe-name { font-size: 11px; font-weight: 700; color: #555; }
+
+  .form-textarea {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid rgba(233,30,99,0.2);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.9);
+    color: #333; font-size: 15px; font-family: inherit;
+    resize: vertical; min-height: 70px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .form-textarea:focus { border-color: #e91e63; }
+
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #e91e63, #ad1457);
+    color: white; border: none; border-radius: 16px;
+    padding: 18px; font-size: 18px; font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(233,30,99,0.4);
+    transition: transform 0.12s;
+    margin-top: 6px;
+  }
+  .btn-submit:hover { transform: scale(1.02); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* ── CONFIRM SCREEN ── */
+  #screen-confirm {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding: 32px 20px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .confirm-icon { font-size: 80px; display: block; margin-bottom: 10px; }
+  .confirm-title {
+    font-size: clamp(24px, 6vw, 36px);
+    font-weight: 900; color: #c2185b;
+    margin: 0 0 6px;
+  }
+  .confirm-card {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(233,30,99,0.18);
+    border-radius: 20px;
+    padding: 20px 22px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 30px rgba(233,30,99,0.14);
+    margin: 20px 0;
+    text-align: left;
+  }
+  .confirm-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(233,30,99,0.1);
+    font-size: 14px;
+  }
+  .confirm-row:last-child { border: none; padding-bottom: 0; }
+  .confirm-row-icon { font-size: 20px; flex-shrink: 0; }
+  .confirm-row-label { font-size: 11px; color: #e91e63; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+  .confirm-row-val { font-weight: 600; color: #333; }
+
+  .btn-start-over {
+    background: rgba(255,255,255,0.7);
+    border: 2px solid rgba(233,30,99,0.25);
+    color: #e91e63; font-weight: 700;
+    border-radius: 999px; padding: 12px 28px;
+    font-size: 14px; cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+  .btn-start-over:hover { background: rgba(233,30,99,0.08); }
+
+  /* ── CONFETTI ── */
+  .confetti-piece {
+    position: fixed;
+    top: -12px;
+    width: 10px; height: 10px;
+    pointer-events: none;
+    z-index: 500;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── FLOATING HEARTS (celebration) ── */
+  .float-heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: 400;
+    font-size: 22px;
+    animation: floatHeart 1.8s ease-out forwards;
+  }
+  @keyframes floatHeart {
+    0% { transform: translateY(0) scale(0.5); opacity: 1; }
+    100% { transform: translateY(-140px) scale(1.2); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating background hearts -->
+<div class="hearts-bg" id="heartsBg"></div>
+
+<!-- ══════════ SCREEN: ASK ══════════ -->
+<div class="screen active" id="screen-ask">
+  <div class="envelope-wrap">💌</div>
+  <h1 class="ask-title">Will you go on a<br>date with me?</h1>
+  <p class="ask-sub">Tap the button you mean it 💕</p>
+  <button class="btn-yes" id="btnYes" onclick="onYes()">Yes! 💕</button>
+  <br>
+  <button class="btn-no" id="btnNo">No</button>
+</div>
+
+<!-- ══════════ SCREEN: CELEBRATE ══════════ -->
+<div class="screen" id="screen-celebrate">
+  <div class="celebrate-icon">🎉</div>
+  <h2 class="celebrate-title">YAY! You said YES!</h2>
+  <p class="celebrate-sub">This is literally the best day ever 🥹</p>
+  <button class="btn-plan" onclick="goToPlan()">📅 Let's plan our date!</button>
+</div>
+
+<!-- ══════════ SCREEN: PLAN ══════════ -->
+<div class="screen" id="screen-plan">
+  <button class="plan-back" onclick="goToScreen('screen-celebrate')">← Back</button>
+  <h2 class="plan-title">Plan Our Date 💘</h2>
+  <p class="plan-sub">Fill in the details and make it official!</p>
+
+  <div class="form-card">
+    <label class="form-label">Your name 👤</label>
+    <input class="form-input" type="text" id="inputName" placeholder="e.g. Zara" maxlength="40" />
+  </div>
+
+  <div class="form-card">
+    <label class="form-label">Date & Time 📅</label>
+    <div class="row-2">
+      <input class="form-input" type="date" id="inputDate" />
+      <input class="form-input" type="time" id="inputTime" />
+    </div>
+  </div>
+
+  <div class="form-card">
+    <label class="form-label">What's the vibe? ✨</label>
+    <div class="vibe-grid" id="vibeGrid">
+      <div class="vibe-card selected" data-vibe="Romantic Dinner" onclick="selectVibe(this)">
+        <span class="vibe-icon">🍷</span>
+        <span class="vibe-name">Dinner</span>
+      </div>
+      <div class="vibe-card" data-vibe="Movie Night" onclick="selectVibe(this)">
+        <span class="vibe-icon">🎬</span>
+        <span class="vibe-name">Movie</span>
+      </div>
+      <div class="vibe-card" data-vibe="Picnic in the Park" onclick="selectVibe(this)">
+        <span class="vibe-icon">🧺</span>
+        <span class="vibe-name">Picnic</span>
+      </div>
+      <div class="vibe-card" data-vibe="Coffee Date" onclick="selectVibe(this)">
+        <span class="vibe-icon">☕</span>
+        <span class="vibe-name">Coffee</span>
+      </div>
+      <div class="vibe-card" data-vibe="Theme Park Adventure" onclick="selectVibe(this)">
+        <span class="vibe-icon">🎡</span>
+        <span class="vibe-name">Fun Park</span>
+      </div>
+      <div class="vibe-card" data-vibe="Beach Sunset Walk" onclick="selectVibe(this)">
+        <span class="vibe-icon">🌅</span>
+        <span class="vibe-name">Beach</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <label class="form-label">Special message 💬 (optional)</label>
+    <textarea class="form-textarea" id="inputNote" placeholder="e.g. Can't wait to finally see you 🥺" maxlength="200"></textarea>
+  </div>
+
+  <button class="btn-submit" onclick="submitPlan()">Confirm our date! 💌</button>
+</div>
+
+<!-- ══════════ SCREEN: CONFIRM ══════════ -->
+<div class="screen" id="screen-confirm">
+  <span class="confirm-icon">💌</span>
+  <h2 class="confirm-title">It's official!</h2>
+  <p style="color:#e91e63; font-size:14px; margin:0 0 4px;">Your date is locked in 🔒</p>
+
+  <div class="confirm-card" id="confirmCard"></div>
+
+  <p style="font-size:13px; color:#ad1457; opacity:0.7; margin: 8px 0 16px;">
+    Screenshot this &amp; send it to them 📸
+  </p>
+  <button class="btn-start-over" onclick="startOver()">💫 Make another date</button>
+</div>
+
+<script>
+/* ─── BACKGROUND HEARTS ─── */
+const hb = document.getElementById('heartsBg');
+const heartEmojis = ['💕','💗','💖','💝','❤️','🩷','💞'];
+for (let i = 0; i < 18; i++) {
+  const h = document.createElement('div');
+  h.className = 'bg-heart';
+  h.textContent = heartEmojis[i % heartEmojis.length];
+  h.style.left = (Math.random() * 100) + '%';
+  h.style.animationDuration = (8 + Math.random() * 12) + 's';
+  h.style.animationDelay = (-Math.random() * 20) + 's';
+  h.style.fontSize = (14 + Math.random() * 18) + 'px';
+  hb.appendChild(h);
+}
+
+/* ─── NO BUTTON LOGIC ─── */
+const btnNo = document.getElementById('btnNo');
+const noLabels = ['No','Nope 😐','Still no 🙄','Really??','NOOO 😤','...ok fine maybe','Catch me if u can 🏃'];
+let noCount = 0;
+let noSize = 14;
+
+function placeNoBtn() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const bw = btnNo.offsetWidth || 100, bh = btnNo.offsetHeight || 42;
+  const margin = 20;
+  const x = margin + Math.random() * (vw - bw - margin * 2);
+  const y = margin + Math.random() * (vh - bh - margin * 2);
+  btnNo.style.left = x + 'px';
+  btnNo.style.top = y + 'px';
+}
+
+function runAway() {
+  noCount++;
+  noSize = Math.max(9, 14 - noCount);
+  btnNo.style.fontSize = noSize + 'px';
+  btnNo.style.padding = `${Math.max(4, 10 - noCount)}px ${Math.max(10, 22 - noCount * 2)}px`;
+  btnNo.textContent = noLabels[Math.min(noCount, noLabels.length - 1)];
+  if (noCount >= 6) {
+    btnNo.style.opacity = '0.3';
+    btnNo.style.transform = 'scale(0.6)';
+  }
+  placeNoBtn();
+}
+
+// Start no button in a sensible position after layout
+window.addEventListener('load', () => {
+  placeNoBtn();
+});
+
+btnNo.addEventListener('mouseover', runAway);
+btnNo.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  runAway();
+}, { passive: false });
+btnNo.addEventListener('click', runAway);
+
+/* ─── YES ─── */
+function onYes() {
+  burstConfetti();
+  floatHearts(document.getElementById('btnYes'));
+  setTimeout(() => goToScreen('screen-celebrate'), 600);
+}
+
+/* ─── NAVIGATION ─── */
+function goToScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToPlan() {
+  // Set default date to tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('inputDate').value = tomorrow.toISOString().slice(0, 10);
+  document.getElementById('inputTime').value = '19:00';
+  goToScreen('screen-plan');
+}
+
+/* ─── VIBE SELECTION ─── */
+let selectedVibe = 'Romantic Dinner';
+function selectVibe(el) {
+  document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedVibe = el.dataset.vibe;
+}
+
+/* ─── SUBMIT ─── */
+function submitPlan() {
+  const name = document.getElementById('inputName').value.trim();
+  const date = document.getElementById('inputDate').value;
+  const time = document.getElementById('inputTime').value;
+  const note = document.getElementById('inputNote').value.trim();
+
+  if (!name) { shakeInput('inputName'); return; }
+  if (!date) { shakeInput('inputDate'); return; }
+  if (!time) { shakeInput('inputTime'); return; }
+
+  const dateObj = new Date(date + 'T' + time);
+  const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+  const card = document.getElementById('confirmCard');
+  card.innerHTML = `
+    <div class="confirm-row">
+      <span class="confirm-row-icon">💑</span>
+      <div><div class="confirm-row-label">Who said yes?</div><div class="confirm-row-val">${esc(name)}</div></div>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-row-icon">📅</span>
+      <div><div class="confirm-row-label">Date</div><div class="confirm-row-val">${esc(dateStr)}</div></div>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-row-icon">⏰</span>
+      <div><div class="confirm-row-label">Time</div><div class="confirm-row-val">${esc(timeStr)}</div></div>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-row-icon">✨</span>
+      <div><div class="confirm-row-label">Vibe</div><div class="confirm-row-val">${esc(selectedVibe)}</div></div>
+    </div>
+    ${note ? `<div class="confirm-row">
+      <span class="confirm-row-icon">💬</span>
+      <div><div class="confirm-row-label">Message</div><div class="confirm-row-val">${esc(note)}</div></div>
+    </div>` : ''}
+  `;
+
+  burstConfetti();
+  goToScreen('screen-confirm');
+}
+
+function startOver() {
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputNote').value = '';
+  // reset vibe
+  document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector('.vibe-card').classList.add('selected');
+  selectedVibe = 'Romantic Dinner';
+  goToScreen('screen-ask');
+  setTimeout(placeNoBtn, 100);
+  noCount = 0; noSize = 14;
+  btnNo.style.fontSize = '14px';
+  btnNo.style.padding = '10px 22px';
+  btnNo.style.opacity = '1';
+  btnNo.style.transform = 'scale(1)';
+  btnNo.textContent = 'No';
+}
+
+/* ─── UTILS ─── */
+function esc(s) { return (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function shakeInput(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#e91e63';
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'shake 0.4s ease';
+  setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 500);
+}
+
+function burstConfetti() {
+  const colors = ['#e91e63','#f48fb1','#ff80ab','#f8bbd9','#ad1457','#fff','#ffcdd2','#fce4ec'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.left = (10 + Math.random() * 80) + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+      c.style.animationDelay = (Math.random() * 0.5) + 's';
+      c.style.width = (6 + Math.random() * 8) + 'px';
+      c.style.height = (6 + Math.random() * 8) + 'px';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }, i * 18);
+  }
+}
+
+function floatHearts(anchor) {
+  const rect = anchor.getBoundingClientRect();
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      const h = document.createElement('div');
+      h.className = 'float-heart';
+      h.textContent = ['💕','💗','💖','❤️','🩷'][i % 5];
+      h.style.left = (rect.left + Math.random() * rect.width) + 'px';
+      h.style.top = (rect.top + rect.height / 2) + 'px';
+      h.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 2500);
+    }, i * 80);
+  }
+}
+
+/* Shake animation */
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }`;
+document.head.appendChild(shakeStyle);
+</script>
+</body>
+</html>
