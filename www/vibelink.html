@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>VibeLink — Plan it. Link it. Show up.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ── Brand tokens ── */
+:root{
+  --p:#7c3aed;--pd:#5b21b6;--p2:#ec4899;--p3:#f97316;
+  --pl:rgba(124,58,237,.12);--pg:rgba(124,58,237,.35);
+  --bg:linear-gradient(160deg,#faf5ff 0%,#fdf2f8 55%,#fff7ed 100%);
+  --card:rgba(255,255,255,.82);--border:rgba(0,0,0,.08);
+  --text:#1a1a2e;--soft:#6b7280;
+  --brand-grad:linear-gradient(135deg,#7c3aed,#ec4899,#f97316);
+}
+
+/* Dynamic theme vars (updated by JS) */
+body{background:var(--bg);min-height:100vh;transition:background .5s;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px 56px;position:relative;z-index:1;}
+.screen.active{display:flex;}
+#screen-plan,#screen-confirm,#screen-invite{justify-content:flex-start;padding-top:24px;max-width:540px;margin:0 auto;width:100%;}
+
+/* ── AMBIENT PARTICLES ── */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:pFloat linear infinite;opacity:.12;}
+@keyframes pFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:.12;}100%{transform:translateY(-10vh) rotate(360deg);opacity:0;}}
+
+/* ═══════════════════════════════
+   VIBELINK BRAND HEADER
+═══════════════════════════════ */
+.vl-brand{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.vl-logo{
+  width:52px;height:52px;border-radius:16px;
+  background:var(--brand-grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  box-shadow:0 8px 24px rgba(124,58,237,.35);
+  flex-shrink:0;
+}
+.vl-name{
+  margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;
+  background:var(--brand-grad);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  line-height:1;
+}
+.vl-tagline{margin:3px 0 0;font-size:13px;color:var(--soft);font-weight:500;}
+
+/* ── TYPE SELECTION ── */
+#screen-type{padding:28px 16px 56px;text-align:center;}
+.type-intro{font-size:15px;color:var(--soft);margin-bottom:24px;}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:480px;width:100%;}
+@media(max-width:360px){.type-grid{grid-template-columns:repeat(2,1fr);}}
+.type-card{
+  background:var(--card);border:2px solid var(--border);border-radius:20px;
+  padding:18px 10px;text-align:center;cursor:pointer;
+  transition:transform .18s,box-shadow .18s,border-color .2s;
+  backdrop-filter:blur(10px);user-select:none;
+}
+.type-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(124,58,237,.15);border-color:var(--pl);}
+.type-card:active{transform:scale(.93);}
+.tc-emoji{font-size:34px;display:block;margin-bottom:8px;}
+.tc-label{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.5px;}
+
+/* ── ASK SCREEN ── */
+#screen-ask{text-align:center;}
+.ask-emoji{font-size:88px;animation:bob 1.8s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 8px 20px rgba(124,58,237,.3));}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-14px) rotate(4deg);}}
+.ask-title{font-size:clamp(26px,7vw,44px);font-weight:900;color:var(--p);margin:16px 0 8px;line-height:1.2;}
+.ask-sub{color:var(--soft);font-size:15px;margin-bottom:36px;}
+.btn-yes{
+  background:var(--brand-grad);color:#fff;border:none;border-radius:999px;
+  padding:18px 48px;font-size:22px;font-weight:800;cursor:pointer;
+  box-shadow:0 8px 30px rgba(124,58,237,.4);
+  transition:transform .12s,box-shadow .12s;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.btn-yes:hover{transform:scale(1.06);box-shadow:0 14px 40px rgba(124,58,237,.5);}
+.btn-yes:active{transform:scale(.97);}
+.btn-no{
+  position:fixed;z-index:20;background:#fff;color:#aaa;
+  border:2px solid #e5e7eb;border-radius:999px;padding:10px 22px;
+  font-size:14px;font-weight:600;cursor:pointer;user-select:none;
+  white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+
+/* ── FORMS ── */
+.back-btn{background:none;border:none;color:var(--p);font-size:15px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;display:flex;align-items:center;gap:6px;align-self:flex-start;}
+.plan-title{font-size:24px;font-weight:900;color:var(--p);margin:0 0 3px;text-align:center;}
+.plan-sub{text-align:center;color:var(--soft);font-size:14px;margin-bottom:18px;}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:12px;}
+.flabel{display:block;font-size:11px;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.9px;margin-bottom:10px;}
+.finput,.ftextarea{width:100%;padding:11px 14px;border:1.5px solid rgba(0,0,0,.1);border-radius:12px;background:rgba(255,255,255,.9);color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;}
+.finput:focus,.ftextarea:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl);}
+.ftextarea{resize:vertical;min-height:72px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ── ACTIVITY GRID ── */
+.act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media(max-width:360px){.act-grid{grid-template-columns:repeat(2,1fr);}}
+.act-card{background:rgba(255,255,255,.6);border:2px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s;user-select:none;}
+.act-card:active{transform:scale(.96);}
+.act-card.sel{border-color:var(--p);background:var(--pl);box-shadow:0 2px 12px var(--pg);}
+.ac-icon{font-size:24px;display:block;margin-bottom:4px;}
+.ac-name{font-size:10px;font-weight:700;color:var(--text);}
+
+/* ── FOOD ── */
+.food-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;margin-bottom:10px;}
+.food-tabs::-webkit-scrollbar{display:none;}
+.ftab{flex-shrink:0;background:rgba(255,255,255,.6);border:1.5px solid var(--border);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text);transition:all .15s;}
+.ftab.active{background:var(--p);color:#fff;border-color:transparent;}
+.food-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:210px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.food-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.6);border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .15s;user-select:none;font-size:12px;font-weight:600;color:var(--text);}
+.food-item:active{transform:scale(.97);}
+.food-item.sel{border-color:var(--p);background:var(--pl);color:var(--p);}
+.fcheck{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;}
+.food-item.sel .fcheck{background:var(--p);border-color:var(--p);color:#fff;}
+.food-preview{font-size:12px;color:var(--soft);margin-top:8px;min-height:16px;}
+.food-preview.has{color:var(--p);font-weight:700;}
+
+/* ── DRESS / CHIPS ── */
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{background:rgba(255,255,255,.6);border:1.5px solid var(--border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none;}
+.chip.sel{background:var(--p);color:#fff;border-color:transparent;}
+
+/* ── EXCITEMENT ── */
+.exc-slider{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,var(--p) var(--v,80%),#e5e7eb var(--v,80%));outline:none;}
+.exc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--brand-grad);cursor:pointer;box-shadow:0 2px 8px rgba(124,58,237,.4);border:3px solid #fff;}
+.exc-label{font-size:12px;color:var(--soft);margin-top:6px;text-align:center;}
+
+/* ── SUBMIT ── */
+.btn-submit{width:100%;background:var(--brand-grad);color:#fff;border:none;border-radius:16px;padding:18px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(124,58,237,.35);transition:transform .12s;margin-top:8px;}
+.btn-submit:hover{transform:scale(1.02);}
+.btn-submit:active{transform:scale(.98);}
+
+/* ── CONFIRM ── */
+.conf-emoji{font-size:68px;display:block;margin-bottom:8px;}
+.conf-title{font-size:clamp(22px,6vw,34px);font-weight:900;color:var(--p);margin:0 0 4px;}
+.conf-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 22px;backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.1);margin:16px 0;text-align:left;}
+.crow{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+.crow:last-child{border:none;padding-bottom:0;}
+.crow-icon{font-size:20px;flex-shrink:0;line-height:1;}
+.crow-lbl{font-size:10px;color:var(--p);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.crow-val{font-weight:600;color:var(--text);font-size:14px;}
+.cd-box{background:var(--pl);border-radius:12px;padding:10px 16px;text-align:center;border:1px solid rgba(124,58,237,.12);margin-bottom:12px;}
+.cd-lbl{font-size:11px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;}
+.cd-time{font-size:22px;font-weight:900;color:var(--p);margin-top:4px;}
+.share-row{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-share{flex:1;min-width:130px;background:var(--brand-grad);color:#fff;border:none;border-radius:12px;padding:13px 12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s;}
+.btn-share:hover{transform:scale(1.03);}
+.btn-outline{flex:1;min-width:130px;background:rgba(255,255,255,.85);color:var(--p);border:2px solid var(--pl);border-radius:12px;padding:13px 12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+.btn-outline:hover{background:var(--pl);}
+.btn-ghost{background:transparent;border:2px solid var(--pl);color:var(--p);font-weight:700;border-radius:999px;padding:11px 28px;font-size:14px;cursor:pointer;margin-top:10px;transition:all .15s;}
+.btn-ghost:hover{background:var(--pl);}
+.vl-footer{font-size:11px;color:var(--soft);text-align:center;margin-top:14px;opacity:.7;}
+
+/* ── INVITE SCREEN ── */
+#screen-invite{text-align:center;padding-top:32px;padding-bottom:60px;}
+.vl-invite-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+.vl-invite-logo{width:38px;height:38px;border-radius:11px;background:var(--brand-grad);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(124,58,237,.3);}
+.vl-invite-name{font-size:20px;font-weight:900;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.inv-badge{display:inline-block;background:var(--brand-grad);color:#fff;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:5px 16px;border-radius:999px;margin-bottom:14px;}
+.inv-emoji{font-size:76px;display:block;margin-bottom:10px;}
+.inv-title{font-size:clamp(22px,6vw,36px);font-weight:900;color:var(--p);margin:0 0 6px;}
+.inv-from{font-size:15px;color:var(--soft);margin-bottom:20px;}
+.inv-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px;}
+.btn-accept{background:var(--brand-grad);color:#fff;border:none;border-radius:999px;padding:16px 36px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(124,58,237,.4);transition:transform .12s;}
+.btn-accept:hover{transform:scale(1.05);}
+.btn-decline{background:#fff;color:#9ca3af;border:2px solid #e5e7eb;border-radius:999px;padding:16px 36px;font-size:16px;font-weight:700;cursor:pointer;}
+.resp-box{background:var(--card);border-radius:16px;padding:22px;border:2px solid var(--p);text-align:center;margin-top:16px;display:none;}
+.resp-box.show{display:block;}
+.resp-big{font-size:52px;display:block;margin-bottom:8px;}
+.resp-txt{font-weight:700;color:var(--p);margin:0 0 12px;font-size:16px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;border-radius:999px;padding:12px 24px;font-size:14px;font-weight:700;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── CONFETTI / HEARTS ── */
+.cfp{position:fixed;top:-12px;pointer-events:none;z-index:500;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+.fh{position:fixed;pointer-events:none;z-index:400;animation:fhUp ease-out forwards;}
+@keyframes fhUp{0%{transform:translateY(0) scale(.5);opacity:1;}100%{transform:translateY(-160px) scale(1.3);opacity:0;}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.shake{animation:shake .4s ease;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(124,58,237,.2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════
+     SCREEN 1 — HOME / TYPE SELECTION
+════════════════════════════════════ -->
+<div class="screen active" id="screen-type">
+
+  <!-- Brand header -->
+  <div class="vl-brand">
+    <div class="vl-logo">⚡</div>
+    <div>
+      <h1 class="vl-name">VibeLink</h1>
+      <p class="vl-tagline">Plan it. Link it. Show up.</p>
+    </div>
+  </div>
+
+  <p class="type-intro">What kind of hangout are you planning?</p>
+
+  <div class="type-grid">
+    <div class="type-card" onclick="selectType('romantic')">
+      <span class="tc-emoji">💕</span>
+      <span class="tc-label">Romantic Date</span>
+    </div>
+    <div class="type-card" onclick="selectType('friends')">
+      <span class="tc-emoji">🤜</span>
+      <span class="tc-label">Friend Hangout</span>
+    </div>
+    <div class="type-card" onclick="selectType('group')">
+      <span class="tc-emoji">🎊</span>
+      <span class="tc-label">Group Outing</span>
+    </div>
+    <div class="type-card" onclick="selectType('study')">
+      <span class="tc-emoji">📚</span>
+      <span class="tc-label">Study Session</span>
+    </div>
+    <div class="type-card" onclick="selectType('games')">
+      <span class="tc-emoji">🎮</span>
+      <span class="tc-label">Game Night</span>
+    </div>
+    <div class="type-card" onclick="selectType('family')">
+      <span class="tc-emoji">🏡</span>
+      <span class="tc-label">Family Time</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════
+     SCREEN 2 — ASK (running No button)
+════════════════════════════════════ -->
+<div class="screen" id="screen-ask">
+  <span class="ask-emoji" id="askEmoji">⚡</span>
+  <h1 class="ask-title" id="askTitle">Will you go on a date with me?</h1>
+  <p class="ask-sub" id="askSub">Just you and me 🥺</p>
+  <button class="btn-yes" id="btnYes" onclick="onYes()">
+    <span id="yesLabel">Yes! 💕</span>
+  </button>
+  <button class="btn-no" id="btnNo">No</button>
+</div>
+
+<!-- ════════════════════════════════════
+     SCREEN 3 — FULL PLANNER
+════════════════════════════════════ -->
+<div class="screen" id="screen-plan">
+  <button class="back-btn" onclick="goTo('screen-ask')">← Back</button>
+  <h2 class="plan-title" id="planTitle">Plan Your Hangout ⚡</h2>
+  <p class="plan-sub" id="planSub">Fill in the details and create your invite link!</p>
+
+  <div class="form-card">
+    <label class="flabel">Your name 👤</label>
+    <input class="finput" type="text" id="iName" placeholder="e.g. Zara" maxlength="40" />
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">📅 When?</label>
+    <div class="row2">
+      <input class="finput" type="date" id="iDate" />
+      <input class="finput" type="time" id="iTime" />
+    </div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">📍 Where to meet?</label>
+    <input class="finput" type="text" id="iLocation" placeholder="e.g. Kabul City Center, Main Gate..." maxlength="80" />
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">🎯 Activity</label>
+    <div class="act-grid" id="actGrid"></div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">🍽️ Food picks (select as many as you like!)</label>
+    <div class="food-tabs" id="foodTabs"></div>
+    <div class="food-list" id="foodList"></div>
+    <div class="food-preview" id="foodPreview">Nothing selected yet</div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">👗 Dress code</label>
+    <div class="chip-row" id="dressRow">
+      <div class="chip sel" data-val="Casual 👕" onclick="pickChip(this,'dress')">Casual 👕</div>
+      <div class="chip" data-val="Smart Casual 👗" onclick="pickChip(this,'dress')">Smart Casual 👗</div>
+      <div class="chip" data-val="Formal 🤵" onclick="pickChip(this,'dress')">Formal 🤵</div>
+      <div class="chip" data-val="Comfy & Cozy 🧸" onclick="pickChip(this,'dress')">Comfy 🧸</div>
+      <div class="chip" data-val="Sporty 🏃" onclick="pickChip(this,'dress')">Sporty 🏃</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">👥 Group details</label>
+    <div class="row2">
+      <select class="finput" id="iPeople">
+        <option value="Just us 2">Just us 2</option>
+        <option value="3 people">3 people</option>
+        <option value="4–5 people">4–5 people</option>
+        <option value="6–10 people">6–10 people</option>
+        <option value="Big group (10+)">Big group (10+)</option>
+      </select>
+      <select class="finput" id="iTransport">
+        <option value="">Getting there?</option>
+        <option value="Driving 🚗">Driving 🚗</option>
+        <option value="Walking 🚶">Walking 🚶</option>
+        <option value="Taxi / Ride 🚕">Taxi / Ride 🚕</option>
+        <option value="Public transit 🚌">Public transit 🚌</option>
+        <option value="Surprise! 🎁">Surprise! 🎁</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">🔥 Excitement level</label>
+    <input type="range" min="1" max="100" value="80" class="exc-slider" id="excSlider"
+      oninput="updateExc(this)" style="--v:80%" />
+    <div class="exc-label" id="excLabel">Can't stop thinking about it 🔥🔥</div>
+  </div>
+
+  <div class="form-card">
+    <label class="flabel">💬 Personal message (optional)</label>
+    <textarea class="ftextarea" id="iNote" placeholder="e.g. Can't wait, bring your best vibes! ✨" maxlength="250"></textarea>
+  </div>
+
+  <button class="btn-submit" onclick="submitPlan()">⚡ Generate VibeLink</button>
+</div>
+
+<!-- ════════════════════════════════════
+     SCREEN 4 — CONFIRM + SHARE
+════════════════════════════════════ -->
+<div class="screen" id="screen-confirm">
+  <span class="conf-emoji" id="confEmoji">⚡</span>
+  <h2 class="conf-title" id="confTitle">Your VibeLink is ready!</h2>
+  <p style="color:var(--soft);font-size:14px;margin:0 0 4px;">Share it and let them know what's up 🚀</p>
+
+  <div class="conf-card" id="confCard"></div>
+
+  <div class="cd-box" id="cdBox">
+    <div class="cd-lbl">⏳ Countdown to hangout</div>
+    <div class="cd-time" id="cdTime">—</div>
+  </div>
+
+  <div class="share-row">
+    <button class="btn-share" onclick="doShare()">📤 Share Invite</button>
+    <button class="btn-outline" onclick="doCopyLink()">🔗 Copy VibeLink</button>
+  </div>
+  <div style="margin-top:8px;">
+    <button class="btn-outline" style="width:100%;" onclick="doWhatsApp()">💬 Share on WhatsApp</button>
+  </div>
+
+  <p class="vl-footer">📸 Screenshot to share anywhere &nbsp;•&nbsp; Powered by ⚡ VibeLink</p>
+  <button class="btn-ghost" onclick="startOver()">⚡ Create new VibeLink</button>
+</div>
+
+<!-- ════════════════════════════════════
+     SCREEN 5 — INVITE (recipient view)
+════════════════════════════════════ -->
+<div class="screen" id="screen-invite">
+
+  <!-- VibeLink brand at top of invite -->
+  <div class="vl-invite-brand">
+    <div class="vl-invite-logo">⚡</div>
+    <span class="vl-invite-name">VibeLink</span>
+  </div>
+
+  <span class="inv-badge" id="invBadge">You've been invited! 🎊</span>
+  <span class="inv-emoji" id="invEmoji">⚡</span>
+  <h1 class="inv-title" id="invTitle">You're invited!</h1>
+  <p class="inv-from" id="invFrom">From: someone special 💌</p>
+
+  <div class="conf-card" id="invCard" style="text-align:left;width:100%;"></div>
+
+  <div class="cd-box" id="invCdBox" style="display:none;">
+    <div class="cd-lbl">⏳ Time until hangout</div>
+    <div class="cd-time" id="invCdTime">—</div>
+  </div>
+
+  <div class="inv-actions" id="invActions">
+    <button class="btn-accept" onclick="acceptInvite()">I'll be there! ✅</button>
+    <button class="btn-decline" onclick="declineInvite()">Can't make it 😢</button>
+  </div>
+
+  <div class="resp-box" id="respBox"></div>
+
+  <p class="vl-footer" style="margin-top:28px;">Invite created with ⚡ VibeLink</p>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   DATA
+═══════════════════════════════════ */
+const TYPES={
+  romantic:{emoji:'💕',label:'Romantic Date',askText:'Will you go on a date with me?',askSub:'Just you and me 🥺',yesLabel:'Yes! 💕',planTitle:'Plan Your Date 💕',planSub:'Fill in the details and generate your VibeLink!',celebText:'Your date is ON! 🥹',primary:'#e91e63',dark:'#ad1457',bg:'linear-gradient(160deg,#fff0f6 0%,#fce4ec 100%)'},
+  friends:{emoji:'🤜',label:'Friend Hangout',askText:'Wanna hang out?',askSub:"It'll be fun, I promise! 😄",yesLabel:"Let's go! 🤙",planTitle:'Plan the Hangout 🤙',planSub:'Pick the details and link up!',celebText:"Let's GOOO! 🙌",primary:'#6366f1',dark:'#4338ca',bg:'linear-gradient(160deg,#f5f3ff 0%,#ede9fe 100%)'},
+  group:{emoji:'🎊',label:'Group Outing',askText:'Squad outing — you in?',askSub:'The more the merrier! 🎊',yesLabel:'COUNT ME IN 🎉',planTitle:'Plan the Group Outing 🎉',planSub:'The squad deserves the best plan!',celebText:'Squad is linking up! 🎊',primary:'#f59e0b',dark:'#d97706',bg:'linear-gradient(160deg,#fffbeb 0%,#fef3c7 100%)'},
+  study:{emoji:'📚',label:'Study Session',askText:'Wanna study together?',askSub:'Two brains > one brain 🧠',yesLabel:"I'm in! 📖",planTitle:'Plan the Study Sesh 📖',planSub:'Hard work + good company = success!',celebText:'Study link activated! 🎓',primary:'#10b981',dark:'#059669',bg:'linear-gradient(160deg,#ecfdf5 0%,#d1fae5 100%)'},
+  games:{emoji:'🎮',label:'Game Night',askText:"Game night — you playing?",askSub:'Winner buys snacks 😏',yesLabel:"GG let's go! 🕹️",planTitle:'Plan Game Night 🕹️',planSub:'May the best player win!',celebText:'Player 2 has entered! 🎮',primary:'#8b5cf6',dark:'#6d28d9',bg:'linear-gradient(160deg,#faf5ff 0%,#ede9fe 100%)'},
+  family:{emoji:'🏡',label:'Family Time',askText:"Family hangout — you coming?",askSub:'Making memories forever 💝',yesLabel:'Of course! ❤️',planTitle:'Plan Family Time 👨‍👩‍👧',planSub:'Quality time with people who matter most!',celebText:'Family link sent! ❤️',primary:'#ef4444',dark:'#dc2626',bg:'linear-gradient(160deg,#fff5f5 0%,#fee2e2 100%)'},
+};
+const ACTIVITIES=[
+  {id:'dinner',icon:'🍽️',name:'Restaurant'},{id:'cafe',icon:'☕',name:'Cafe'},
+  {id:'movie',icon:'🎬',name:'Cinema'},{id:'picnic',icon:'🧺',name:'Picnic'},
+  {id:'park',icon:'🌳',name:'Park Walk'},{id:'funpark',icon:'🎡',name:'Fun Park'},
+  {id:'beach',icon:'🏖️',name:'Beach'},{id:'gaming',icon:'🕹️',name:'Gaming'},
+  {id:'shopping',icon:'🛍️',name:'Shopping'},{id:'karaoke',icon:'🎤',name:'Karaoke'},
+  {id:'bowling',icon:'🎳',name:'Bowling'},{id:'homie',icon:'🛋️',name:'Chill at Home'},
+];
+const FOODS=[
+  {id:'afghani',tab:'🇦🇫 Afghani',items:['Kabuli Pulao 🍚','Mantu (Dumplings) 🥟','Bolani 🫓','Chapli Kebab 🍢','Ashak 🥟','Shorwa 🍲','Qorma 🥘','Naan & Kebab 🫓','Sambosa 🥙','Aash 🍜','Firnee 🍮','Sheer Khurma 🥛','Mantu w/ Chaka 🥟','Kabob Doshi 🍡','Quroot & Naan 🫓']},
+  {id:'fastfood',tab:'🍔 Fast Food',items:['Burgers 🍔','Pizza 🍕','Fries & Nuggets 🍟','Hot Dogs 🌭','Wraps 🌯','Tacos 🌮','Shawarma 🥙','Fried Chicken 🍗']},
+  {id:'asian',tab:'🍜 Asian',items:['Sushi & Rolls 🍣','Ramen 🍜','Dim Sum 🥟','Pad Thai 🍝','Biryani 🍚','Fried Rice 🍳','Noodles 🍜','Korean BBQ 🥩']},
+  {id:'italian',tab:'🍝 Italian',items:['Pasta 🍝','Margherita Pizza 🍕','Risotto 🍚','Lasagna 🫕','Tiramisu 🍰','Bruschetta 🥖']},
+  {id:'grill',tab:'🥩 Grill',items:['Mixed Grill 🍖','BBQ Ribs 🥩','Steak 🥩','Kebabs 🍢','Grilled Chicken 🍗','Lamb Chops 🍖']},
+  {id:'healthy',tab:'🥗 Healthy',items:['Salad Bowl 🥗','Smoothie Bowl 🍓','Grain Bowl 🌾','Acai Bowl 🫐','Fresh Juice 🍊','Avocado Toast 🥑']},
+  {id:'sweets',tab:'☕ Cafe & Sweets',items:['Cake & Coffee 🎂','Waffles 🧇','Ice Cream 🍦','Crepes 🥞','Hot Chocolate 🍫','Milkshake 🥤','Bubble Tea 🧋','Churros 🍩']},
+];
+const EXC=[
+  [1,20,'Just a lil curious 🤔'],[21,40,'Might be fun 🙂'],[41,60,"Yeah I'm down! 😊"],
+  [61,80,'Actually excited!! 😄'],[81,95,"Can't stop thinking about it 🔥🔥"],[96,100,'I LITERALLY CANNOT WAIT 🤩🎉'],
+];
+const NO_LABELS=['No','Nope 😐','Still no 🙄',"I don't think so...",'NOOO 😤','Try harder 😏','Catch me if u can 🏃','...fine, maybe 👀','🏃💨 BYE'];
+
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let selType=null,selAct='dinner',selFoods=new Set(),selDress='Casual 👕',selFoodCat='afghani';
+let planData=null,cdInt=null,noCount=0;
+
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  spawnParticles();
+  buildActGrid();
+  buildFoodTabs();
+  buildFoodList('afghani');
+  setupNo();
+
+  const h=window.location.hash;
+  if(h.startsWith('#invite=')){
+    try{showInvite(JSON.parse(decodeURIComponent(escape(atob(h.slice(8))))));return;}
+    catch(e){console.warn('Bad invite link',e);}
+  }
+  goTo('screen-type');
+});
+
+/* ── PARTICLES ── */
+function spawnParticles(){
+  const wrap=document.getElementById('particles');
+  const colors=['#7c3aed','#ec4899','#f97316','#6366f1','#10b981','#fbbf24'];
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='particle';
+    const size=6+Math.random()*12;
+    p.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;background:${colors[i%colors.length]};animation-duration:${12+Math.random()*16}s;animation-delay:${-Math.random()*28}s;`;
+    wrap.appendChild(p);
+  }
+}
+
+/* ── BUILD GRIDS ── */
+function buildActGrid(){
+  const g=document.getElementById('actGrid');g.innerHTML='';
+  ACTIVITIES.forEach(a=>{
+    const d=document.createElement('div');
+    d.className='act-card'+(a.id===selAct?' sel':'');
+    d.innerHTML=`<span class="ac-icon">${a.icon}</span><span class="ac-name">${a.name}</span>`;
+    d.onclick=()=>{selAct=a.id;document.querySelectorAll('.act-card').forEach(c=>c.classList.remove('sel'));d.classList.add('sel');};
+    g.appendChild(d);
+  });
+}
+function buildFoodTabs(){
+  const t=document.getElementById('foodTabs');t.innerHTML='';
+  FOODS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='ftab'+(c.id===selFoodCat?' active':'');
+    b.textContent=c.tab;
+    b.onclick=()=>{selFoodCat=c.id;document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));b.classList.add('active');buildFoodList(c.id);};
+    t.appendChild(b);
+  });
+}
+function buildFoodList(catId){
+  const cat=FOODS.find(c=>c.id===catId);
+  const l=document.getElementById('foodList');l.innerHTML='';
+  cat.items.forEach(item=>{
+    const d=document.createElement('div');
+    const s=selFoods.has(item);
+    d.className='food-item'+(s?' sel':'');
+    d.innerHTML=`<div class="fcheck">${s?'✓':''}</div>${esc(item)}`;
+    d.onclick=()=>{
+      if(selFoods.has(item)){selFoods.delete(item);d.classList.remove('sel');d.querySelector('.fcheck').textContent='';}
+      else{selFoods.add(item);d.classList.add('sel');d.querySelector('.fcheck').textContent='✓';}
+      updateFoodPreview();
+    };
+    l.appendChild(d);
+  });
+}
+function updateFoodPreview(){
+  const p=document.getElementById('foodPreview');
+  if(!selFoods.size){p.textContent='Nothing selected yet';p.className='food-preview';return;}
+  const arr=[...selFoods];
+  p.textContent='✓ '+arr.slice(0,3).join(', ')+(arr.length>3?` +${arr.length-3} more`:'');
+  p.className='food-preview has';
+}
+
+/* ── CHIPS ── */
+function pickChip(el,group){
+  document.querySelectorAll(`#${group==='dress'?'dressRow':''} .chip`).forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');selDress=el.dataset.val;
+}
+
+/* ── EXCITEMENT ── */
+function updateExc(s){
+  const v=parseInt(s.value);s.style.setProperty('--v',v+'%');
+  const l=EXC.find(([lo,hi])=>v>=lo&&v<=hi);
+  document.getElementById('excLabel').textContent=l?l[2]:'';
+}
+
+/* ═══════════════════════════════════
+   TYPE SELECT & THEME
+═══════════════════════════════════ */
+function selectType(type){
+  selType=type;const cfg=TYPES[type];
+  applyTheme(cfg);
+  document.getElementById('askEmoji').textContent=cfg.emoji;
+  document.getElementById('askTitle').textContent=cfg.askText;
+  document.getElementById('askSub').textContent=cfg.askSub;
+  document.getElementById('yesLabel').textContent=cfg.yesLabel;
+  document.getElementById('planTitle').textContent=cfg.planTitle;
+  document.getElementById('planSub').textContent=cfg.planSub;
+  goTo('screen-ask');
+  setTimeout(placeNo,120);
+}
+function applyTheme(cfg){
+  const [r,g,b]=cfg.primary.match(/\w\w/g).slice(0,3).map(x=>parseInt(x,16));
+  document.documentElement.style.setProperty('--p',cfg.primary);
+  document.documentElement.style.setProperty('--pd',cfg.dark);
+  document.documentElement.style.setProperty('--pl',`rgba(${r},${g},${b},.12)`);
+  document.documentElement.style.setProperty('--pg',`rgba(${r},${g},${b},.35)`);
+  document.documentElement.style.setProperty('--bg',cfg.bg);
+  document.body.style.background=cfg.bg;
+}
+
+/* ═══════════════════════════════════
+   NO BUTTON
+═══════════════════════════════════ */
+function setupNo(){
+  const b=document.getElementById('btnNo');
+  b.addEventListener('mouseover',runAway);
+  b.addEventListener('touchstart',e=>{e.preventDefault();runAway();},{passive:false});
+  b.addEventListener('click',runAway);
+}
+function placeNo(){
+  const b=document.getElementById('btnNo');
+  const vw=window.innerWidth,vh=window.innerHeight,bw=b.offsetWidth||100,bh=b.offsetHeight||44,m=28;
+  b.style.left=(m+Math.random()*(vw-bw-m*2))+'px';
+  b.style.top=(m+Math.random()*(vh-bh-m*2))+'px';
+}
+function runAway(){
+  noCount++;
+  const b=document.getElementById('btnNo');
+  b.style.fontSize=Math.max(9,14-Math.floor(noCount/2))+'px';
+  b.style.padding=`${Math.max(4,10-noCount)}px ${Math.max(10,22-noCount*2)}px`;
+  b.style.opacity=noCount>=6?'0.25':'1';
+  b.style.transform=noCount>=7?'scale(.45)':'scale(1)';
+  b.textContent=NO_LABELS[Math.min(noCount,NO_LABELS.length-1)];
+  placeNo();
+}
+
+/* ═══════════════════════════════════
+   YES
+═══════════════════════════════════ */
+function onYes(){
+  burstConfetti();floatHearts(document.getElementById('btnYes'));
+  const t=new Date();t.setDate(t.getDate()+1);
+  document.getElementById('iDate').value=t.toISOString().slice(0,10);
+  document.getElementById('iTime').value='19:00';
+  setTimeout(()=>goTo('screen-plan'),450);
+}
+
+/* ═══════════════════════════════════
+   SUBMIT PLAN
+═══════════════════════════════════ */
+function submitPlan(){
+  const name=document.getElementById('iName').value.trim();
+  const date=document.getElementById('iDate').value;
+  const time=document.getElementById('iTime').value;
+  const note=document.getElementById('iNote').value.trim();
+  const loc=document.getElementById('iLocation').value.trim();
+  const people=document.getElementById('iPeople').value;
+  const transport=document.getElementById('iTransport').value;
+  const excVal=parseInt(document.getElementById('excSlider').value);
+
+  if(!name){shake('iName');toast('Enter your name! 👤');return;}
+  if(!date){shake('iDate');toast('Pick a date! 📅');return;}
+  if(!time){shake('iTime');toast('Pick a time! ⏰');return;}
+
+  const act=ACTIVITIES.find(a=>a.id===selAct)||ACTIVITIES[0];
+  const dateObj=new Date(date+'T'+time);
+  const dateStr=dateObj.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const timeStr=dateObj.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+  const excLbl=EXC.find(([lo,hi])=>excVal>=lo&&excVal<=hi);
+
+  planData={
+    type:selType,typeLabel:TYPES[selType].label,typeEmoji:TYPES[selType].emoji,
+    name,date,time,dateStr,timeStr,location:loc,
+    activity:{id:act.id,icon:act.icon,name:act.name},
+    foods:[...selFoods],dress:selDress,people,transport,
+    excitement:excLbl?excLbl[2]:'',note,
+  };
+
+  document.getElementById('confEmoji').textContent=TYPES[selType].emoji;
+  document.getElementById('confTitle').textContent=TYPES[selType].celebText;
+  buildDetailsCard(planData,'confCard');
+  startCd(new Date(date+'T'+time),'cdTime');
+  burstConfetti();
+  goTo('screen-confirm');
+}
+
+function buildDetailsCard(d,cardId){
+  const foodTxt=d.foods.length?d.foods.map(f=>f.split(' ')[0]).join(', '):'No preference';
+  document.getElementById(cardId).innerHTML=`
+    <div class="crow"><span class="crow-icon">👤</span><div><div class="crow-lbl">Organized by</div><div class="crow-val">${esc(d.name)}</div></div></div>
+    <div class="crow"><span class="crow-icon">${esc(d.typeEmoji)}</span><div><div class="crow-lbl">Hangout type</div><div class="crow-val">${esc(d.typeLabel)}</div></div></div>
+    <div class="crow"><span class="crow-icon">📅</span><div><div class="crow-lbl">Date</div><div class="crow-val">${esc(d.dateStr)}</div></div></div>
+    <div class="crow"><span class="crow-icon">⏰</span><div><div class="crow-lbl">Time</div><div class="crow-val">${esc(d.timeStr)}</div></div></div>
+    ${d.location?`<div class="crow"><span class="crow-icon">📍</span><div><div class="crow-lbl">Location</div><div class="crow-val">${esc(d.location)}</div></div></div>`:''}
+    <div class="crow"><span class="crow-icon">${esc(d.activity.icon)}</span><div><div class="crow-lbl">Activity</div><div class="crow-val">${esc(d.activity.name)}</div></div></div>
+    <div class="crow"><span class="crow-icon">🍽️</span><div><div class="crow-lbl">Food</div><div class="crow-val">${esc(foodTxt)}</div></div></div>
+    <div class="crow"><span class="crow-icon">👗</span><div><div class="crow-lbl">Dress code</div><div class="crow-val">${esc(d.dress)}</div></div></div>
+    <div class="crow"><span class="crow-icon">👥</span><div><div class="crow-lbl">People</div><div class="crow-val">${esc(d.people)}</div></div></div>
+    ${d.transport?`<div class="crow"><span class="crow-icon">🚗</span><div><div class="crow-lbl">Transport</div><div class="crow-val">${esc(d.transport)}</div></div></div>`:''}
+    ${d.excitement?`<div class="crow"><span class="crow-icon">🔥</span><div><div class="crow-lbl">Excitement</div><div class="crow-val">${esc(d.excitement)}</div></div></div>`:''}
+    ${d.note?`<div class="crow"><span class="crow-icon">💬</span><div><div class="crow-lbl">Message</div><div class="crow-val">"${esc(d.note)}"</div></div></div>`:''}
+  `;
+}
+
+/* ── COUNTDOWN ── */
+function startCd(dateObj,elId){
+  clearInterval(cdInt);
+  const tick=()=>{
+    const diff=dateObj-Date.now(),el=document.getElementById(elId);
+    if(!el)return;
+    if(diff<=0){el.textContent="It's time! 🎉";clearInterval(cdInt);return;}
+    const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    el.textContent=d>0?`${d}d ${h}h ${m}m`:`${h}h ${m}m ${s}s`;
+  };
+  tick();cdInt=setInterval(tick,1000);
+}
+
+/* ═══════════════════════════════════
+   SHARING
+═══════════════════════════════════ */
+function genLink(){
+  if(!planData)return'';
+  return window.location.href.split('#')[0]+'#invite='+btoa(unescape(encodeURIComponent(JSON.stringify(planData))));
+}
+function genText(){
+  const d=planData;if(!d)return'';
+  const foods=d.foods.length?d.foods.map(f=>f.split(' ')[0]).join(', '):'TBD';
+  return[`⚡ VIBELINK — ${d.typeLabel.toUpperCase()}`,``,`${d.name} is inviting you!`,``,`📅 ${d.dateStr}`,`⏰ ${d.timeStr}`,d.location?`📍 ${d.location}`:'',`${d.activity.icon} ${d.activity.name}`,`🍽️ ${foods}`,`👗 ${d.dress}`,d.note?`💬 "${d.note}"`:'',``,`👉 Open invite: ${genLink()}`].filter(Boolean).join('\n');
+}
+
+async function doShare(){
+  const text=genText(),link=genLink();
+  if(navigator.share){try{await navigator.share({title:`VibeLink — ${planData.typeLabel}`,text,url:link});return;}catch(e){}}
+  try{await navigator.clipboard.writeText(text);toast('Invite copied! 📋');}
+  catch(e){toast('Use WhatsApp button below 💬');}
+}
+async function doCopyLink(){
+  const link=genLink();
+  try{await navigator.clipboard.writeText(link);toast('VibeLink copied! 🔗 Send it!');}
+  catch(e){const t=document.createElement('input');t.value=link;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('VibeLink copied! 🔗');}
+}
+function doWhatsApp(){
+  const text=encodeURIComponent(genText());
+  window.open('whatsapp://send?text='+text);
+  setTimeout(()=>window.open('https://wa.me/?text='+text,'_blank'),300);
+}
+
+/* ═══════════════════════════════════
+   INVITE RECIPIENT SCREEN
+═══════════════════════════════════ */
+function showInvite(d){
+  selType=d.type||'romantic';
+  const cfg=TYPES[selType]||TYPES.romantic;
+  applyTheme(cfg);
+
+  document.getElementById('invBadge').textContent=`You've been invited! ${cfg.emoji}`;
+  document.getElementById('invEmoji').textContent=cfg.emoji;
+  document.getElementById('invTitle').textContent=`${d.name||'Someone'} is inviting you!`;
+  document.getElementById('invFrom').textContent=`via ⚡ VibeLink`;
+
+  const act=ACTIVITIES.find(a=>a.id===d.activity?.id)||{icon:'🎉',name:d.activity?.name||'Hangout'};
+  const foodTxt=d.foods?.length?d.foods.map(f=>f.split(' ')[0]).join(', '):'Surprise!';
+
+  document.getElementById('invCard').innerHTML=`
+    <div class="crow"><span class="crow-icon">${esc(cfg.emoji)}</span><div><div class="crow-lbl">Event</div><div class="crow-val">${esc(cfg.label)}</div></div></div>
+    <div class="crow"><span class="crow-icon">📅</span><div><div class="crow-lbl">Date</div><div class="crow-val">${esc(d.dateStr||d.date)}</div></div></div>
+    <div class="crow"><span class="crow-icon">⏰</span><div><div class="crow-lbl">Time</div><div class="crow-val">${esc(d.timeStr||d.time)}</div></div></div>
+    ${d.location?`<div class="crow"><span class="crow-icon">📍</span><div><div class="crow-lbl">Location</div><div class="crow-val">${esc(d.location)}</div></div></div>`:''}
+    <div class="crow"><span class="crow-icon">${esc(act.icon)}</span><div><div class="crow-lbl">Activity</div><div class="crow-val">${esc(act.name)}</div></div></div>
+    <div class="crow"><span class="crow-icon">🍽️</span><div><div class="crow-lbl">Food</div><div class="crow-val">${esc(foodTxt)}</div></div></div>
+    <div class="crow"><span class="crow-icon">👗</span><div><div class="crow-lbl">Dress code</div><div class="crow-val">${esc(d.dress||'Casual')}</div></div></div>
+    <div class="crow"><span class="crow-icon">👥</span><div><div class="crow-lbl">Group</div><div class="crow-val">${esc(d.people||'A small group')}</div></div></div>
+    ${d.note?`<div class="crow"><span class="crow-icon">💬</span><div><div class="crow-lbl">Message from ${esc(d.name)}</div><div class="crow-val">"${esc(d.note)}"</div></div></div>`:''}
+  `;
+
+  if(d.date&&d.time){
+    const dt=new Date(d.date+'T'+d.time);
+    if(dt>Date.now()){
+      document.getElementById('invCdBox').style.display='block';
+      startCd(dt,'invCdTime');
+    }
+  }
+  goTo('screen-invite');
+  burstConfetti();
+}
+
+function acceptInvite(){
+  burstConfetti();floatHearts(document.querySelector('.btn-accept'));
+  document.getElementById('invActions').style.display='none';
+  const b=document.getElementById('respBox');
+  b.innerHTML=`<span class="resp-big">🥳</span><p class="resp-txt">You said YES! They'll be so happy!</p><button class="btn-accept" style="font-size:14px;padding:12px 24px;" onclick="copyReply('yes')">Copy your reply 💬</button>`;
+  b.classList.add('show');
+}
+function declineInvite(){
+  document.getElementById('invActions').style.display='none';
+  const b=document.getElementById('respBox');
+  b.innerHTML=`<span class="resp-big">😢</span><p class="resp-txt" style="color:var(--soft)">Aww, maybe next time!</p><button class="btn-ghost" onclick="copyReply('no')">Send a reply 💬</button>`;
+  b.classList.add('show');
+}
+function copyReply(type){
+  const msg=type==='yes'?"OMG YES! I'll be there! Can't wait!! 🎉🥳":"So sorry, can't make it 😢 Let's reschedule!";
+  navigator.clipboard?.writeText(msg).then(()=>toast('Reply copied! Paste it to them 💬')).catch(()=>{});
+}
+
+/* ═══════════════════════════════════
+   UTILS
+═══════════════════════════════════ */
+function goTo(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function startOver(){
+  clearInterval(cdInt);
+  selFoods=new Set();selAct='dinner';selDress='Casual 👕';noCount=0;planData=null;
+  ['iName','iNote','iLocation'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('excSlider').value=80;updateExc(document.getElementById('excSlider'));
+  buildActGrid();buildFoodList('afghani');updateFoodPreview();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  document.querySelector('.chip').classList.add('sel');
+  const b=document.getElementById('btnNo');
+  b.style.cssText='font-size:14px;padding:10px 22px;opacity:1;transform:scale(1);';
+  b.textContent='No';
+  document.documentElement.style.setProperty('--p','#7c3aed');
+  document.documentElement.style.setProperty('--pd','#5b21b6');
+  document.documentElement.style.setProperty('--pl','rgba(124,58,237,.12)');
+  document.documentElement.style.setProperty('--pg','rgba(124,58,237,.35)');
+  document.body.style.background='linear-gradient(160deg,#faf5ff 0%,#fdf2f8 55%,#fff7ed 100%)';
+  goTo('screen-type');
+}
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function shake(id){const e=document.getElementById(id);if(!e)return;e.classList.remove('shake');e.offsetHeight;e.classList.add('shake');setTimeout(()=>e.classList.remove('shake'),500);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ── CONFETTI ── */
+function burstConfetti(){
+  const C=['#7c3aed','#ec4899','#f97316','#a78bfa','#fbbf24','#6ee7b7','#fff','#f9a8d4','#60a5fa'];
+  for(let i=0;i<60;i++)setTimeout(()=>{
+    const c=document.createElement('div');c.className='cfp';
+    c.style.cssText=`left:${5+Math.random()*90}vw;background:${C[Math.floor(Math.random()*C.length)]};width:${5+Math.random()*9}px;height:${5+Math.random()*9}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.5+Math.random()*1.5}s;animation-delay:${Math.random()*.4}s;`;
+    document.body.appendChild(c);setTimeout(()=>c.remove(),3500);
+  },i*14);
+}
+function floatHearts(anchor){
+  if(!anchor)return;
+  const r=anchor.getBoundingClientRect();
+  ['⚡','💕','✨','🔥','💜','🧡','💗'].forEach((em,i)=>setTimeout(()=>{
+    const h=document.createElement('div');h.className='fh';h.textContent=em;
+    h.style.cssText=`font-size:${14+Math.random()*14}px;left:${r.left+Math.random()*r.width}px;top:${r.top}px;animation-duration:${1+Math.random()}s;`;
+    document.body.appendChild(h);setTimeout(()=>h.remove(),2500);
+  },i*70));
+}
+</script>
+</body>
+</html>
