@@ -50,6 +50,9 @@ jobs:
             rsvg-convert -w "$size" -h "$size" www/icon.svg -o "$dir/ic_launcher.png"
             cp "$dir/ic_launcher.png" "$dir/ic_launcher_round.png"
           done
+          # Remove Capacitor's adaptive-icon directory entirely so the old vector
+          # foreground can never override our PNGs on Android 8+ devices.
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
