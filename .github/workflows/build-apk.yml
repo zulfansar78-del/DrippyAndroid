@@ -38,6 +38,19 @@ jobs:
       - name: Patch AndroidManifest with required permissions
         run: node scripts/patch-manifest.js
 
+      - name: Install rsvg-convert (SVG → PNG)
+        run: sudo apt-get install -y librsvg2-bin
+
+      - name: Generate VibeLink launcher icons
+        run: |
+          for entry in "mdpi:48" "hdpi:72" "xhdpi:96" "xxhdpi:144" "xxxhdpi:192"; do
+            density="${entry%%:*}"; size="${entry##*:}"
+            dir="android/app/src/main/res/mipmap-${density}"
+            mkdir -p "$dir"
+            rsvg-convert -w "$size" -h "$size" www/icon.svg -o "$dir/ic_launcher.png"
+            cp "$dir/ic_launcher.png" "$dir/ic_launcher_round.png"
+          done
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
